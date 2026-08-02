@@ -1,67 +1,69 @@
-<x-layout.admin header="Detail Barang Hilang & Smart Matching">
+<x-layouts.admin title="Detail Barang Hilang & Smart Matching - ReturnLy">
 
     <div class="space-y-8">
-        <a href="{{ route('admin.lost-items.index') }}" class="inline-flex items-center text-xs font-semibold text-zinc-600 hover:text-zinc-900">
-            &larr; Kembali ke Daftar Barang Hilang
+        <a href="{{ route('admin.lost-items.index') }}" class="inline-flex items-center space-x-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            <span>Kembali ke Daftar Barang Hilang</span>
         </a>
 
         <!-- Main Detail Card -->
-        <div class="bg-white rounded-2xl border border-[#E7E2DA] shadow-paper p-6 sm:p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-card rounded-[28px] border border-white/10 bg-slate-900/40 backdrop-blur-xl p-6 sm:p-8 grid grid-cols-1 md:grid-cols-3 gap-6 shadow-2xl">
             <!-- Image Column -->
-            <div class="bg-zinc-100 rounded-xl overflow-hidden min-h-[200px] flex items-center justify-center border border-zinc-200">
-                @if ($item->image)
-                    <img src="{{ asset('storage/' . $item->image) }}" class="w-full h-full object-cover">
+            <div class="bg-slate-950/80 rounded-[20px] overflow-hidden min-h-[220px] flex items-center justify-center border border-white/10 relative">
+                @if ($item->photo)
+                    <img src="{{ asset('storage/' . $item->photo) }}" class="w-full h-full object-cover">
                 @else
-                    <span class="text-xs text-zinc-400 font-semibold">Tanpa Foto</span>
+                    <span class="text-xs text-slate-500 font-semibold">Tanpa Foto</span>
                 @endif
             </div>
 
             <!-- Details Column -->
-            <div class="md:col-span-2 space-y-4">
-                <div class="flex items-center justify-between">
+            <div class="md:col-span-2 space-y-5">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                     <div>
-                        <span class="text-xs font-bold text-red-600 uppercase tracking-wider block">Laporan Barang Hilang</span>
-                        <h2 class="text-2xl font-bold text-zinc-900">{{ $item->item_name }}</h2>
+                        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider block mb-1">Laporan Kehilangan</span>
+                        <h2 class="text-2xl font-bold text-white">{{ $item->item_name }}</h2>
                     </div>
                     <x-business.status-badge :status="$item->status" />
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 text-xs bg-[#FAF8F4] p-4 rounded-xl border border-zinc-200">
+                <div class="grid grid-cols-2 gap-4 text-xs bg-slate-950/60 p-4 rounded-[20px] border border-white/5">
                     <div>
-                        <span class="text-zinc-400 block">Kategori:</span>
-                        <span class="font-bold text-zinc-900">{{ $item->category->name }}</span>
+                        <span class="text-slate-500 block text-[10px]">Kategori:</span>
+                        <span class="font-semibold text-white">{{ $item->category->name }}</span>
                     </div>
                     <div>
-                        <span class="text-zinc-400 block">Perkiraan Lokasi Hilang:</span>
-                        <span class="font-bold text-zinc-900">{{ $item->location->name }}</span>
+                        <span class="text-slate-500 block text-[10px]">Perkiraan Lokasi Hilang:</span>
+                        <span class="font-semibold text-white">{{ $item->location->name }}</span>
                     </div>
                     <div>
-                        <span class="text-zinc-400 block">Tanggal Hilang:</span>
-                        <span class="font-bold text-zinc-900">{{ \Carbon\Carbon::parse($item->lost_date)->translatedFormat('d F Y') }}</span>
+                        <span class="text-slate-500 block text-[10px]">Tanggal Hilang:</span>
+                        <span class="font-semibold text-white">{{ $item->lost_date->translatedFormat('d F Y') }}</span>
                     </div>
                     <div>
-                        <span class="text-zinc-400 block">Pelapor / Kontak:</span>
-                        <span class="font-bold text-zinc-900">{{ $item->contact_name }} ({{ $item->contact_phone }})</span>
+                        <span class="text-slate-500 block text-[10px]">Pelapor & WA:</span>
+                        <span class="font-semibold text-white">{{ $item->reporter_name }} @if($item->class_name)({{ $item->class_name }})@endif</span>
+                        <span class="text-emerald-400 font-mono block text-[11px] mt-0.5">{{ $item->phone_number }}</span>
                     </div>
                 </div>
 
                 <div>
-                    <h4 class="text-xs font-bold text-zinc-900 uppercase tracking-wider mb-1">Deskripsi & Ciri Khusus</h4>
-                    <p class="text-xs text-zinc-600 leading-relaxed">{{ $item->description ?: 'Tidak ada deskripsi.' }}</p>
+                    <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Deskripsi & Ciri Khusus</h4>
+                    <p class="text-xs text-slate-300 leading-relaxed bg-slate-950/40 p-3.5 rounded-[16px] border border-white/5">{{ $item->description }}</p>
                 </div>
 
                 <!-- Update Status Form -->
-                <div class="pt-4 border-t border-zinc-100 flex items-center space-x-3">
-                    <form action="{{ route('admin.lost-items.update-status', $item->id) }}" method="POST" class="flex items-center space-x-2">
+                <div class="pt-4 border-t border-white/10 flex flex-wrap items-center gap-3">
+                    <form action="{{ route('admin.lost-items.update-status', $item->id) }}" method="POST" class="flex items-center space-x-3">
                         @csrf
                         @method('PATCH')
-                        <label class="text-xs font-bold text-zinc-700">Ubah Status:</label>
-                        <select name="status" class="px-3 py-1.5 text-xs bg-[#FAF8F4] border border-zinc-300 rounded-lg focus:outline-none">
-                            <option value="lost" {{ $item->status === 'lost' ? 'selected' : '' }}>Hilang</option>
-                            <option value="claimed" {{ $item->status === 'claimed' ? 'selected' : '' }}>Diklaim</option>
-                            <option value="returned" {{ $item->status === 'returned' ? 'selected' : '' }}>Dikembalikan</option>
+                        <label class="text-xs font-bold text-slate-300">Ubah Status:</label>
+                        <select name="status" class="px-3.5 py-2 text-xs bg-slate-950 border border-white/10 rounded-[14px] text-white focus:outline-none focus:border-emerald-500">
+                            <option value="Belum Ditemukan" {{ $item->status === 'Belum Ditemukan' ? 'selected' : '' }}>Belum Ditemukan</option>
+                            <option value="Ditemukan" {{ $item->status === 'Ditemukan' ? 'selected' : '' }}>Ditemukan</option>
+                            <option value="Selesai" {{ $item->status === 'Selesai' ? 'selected' : '' }}>Selesai</option>
                         </select>
-                        <button type="submit" class="px-3 py-1.5 bg-zinc-900 text-white text-xs font-bold rounded-lg hover:bg-zinc-800">
+                        <button type="submit" class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 text-xs font-bold rounded-[14px] hover:brightness-110 shadow-lg shadow-emerald-500/20 transition-all">
                             Update Status
                         </button>
                     </form>
@@ -69,33 +71,33 @@
             </div>
         </div>
 
-        <!-- Smart Manual Matching Widget -->
-        <div class="bg-amber-50/60 rounded-2xl border border-amber-200 p-6 space-y-4">
+        <!-- Smart Manual Matching Recommendations -->
+        <div class="glass-card rounded-[28px] border border-purple-500/30 bg-purple-500/5 backdrop-blur-xl p-6 space-y-4">
             <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold">
+                <div class="w-9 h-9 rounded-[14px] bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center font-bold">
                     💡
                 </div>
                 <div>
-                    <h3 class="text-base font-bold text-zinc-900">Smart Manual Matching</h3>
-                    <p class="text-xs text-zinc-600">Daftar Barang Ditemukan di lokasi <strong>{{ $item->location->name }}</strong> atau kategori <strong>{{ $item->category->name }}</strong> yang berpotensi cocok.</p>
+                    <h3 class="text-base font-bold text-white">Smart Manual Matching</h3>
+                    <p class="text-xs text-slate-400">Barang Ditemukan yang cocok untuk Kategori <strong>{{ $item->category->name }}</strong> dan Lokasi <strong>{{ $item->location->name }}</strong>.</p>
                 </div>
             </div>
 
             @if ($matchingFoundItems->isEmpty())
-                <div class="p-4 bg-white rounded-xl text-center text-xs text-zinc-500 border border-amber-200">
-                    Belum ditemukan barang penemuan yang cocok secara otomatis dengan lokasi/kategori ini.
+                <div class="p-6 bg-slate-950/60 rounded-[20px] text-center text-xs text-slate-400 border border-white/5">
+                    Belum ada barang ditemukan dengan kategori dan lokasi ini yang berstatus 'Menunggu Pemilik'.
                 </div>
             @else
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     @foreach ($matchingFoundItems as $mItem)
-                        <div class="bg-white p-4 rounded-xl border border-amber-200 shadow-sm flex items-center justify-between">
+                        <div class="glass-card p-4 rounded-[20px] border border-white/10 bg-slate-950/60 backdrop-blur-md flex items-center justify-between">
                             <div class="space-y-1">
-                                <span class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Ditemukan</span>
-                                <h4 class="text-xs font-bold text-zinc-900">{{ $mItem->item_name }}</h4>
-                                <p class="text-[11px] text-zinc-500">{{ $mItem->location->name }} • {{ \Carbon\Carbon::parse($mItem->found_date)->translatedFormat('d M Y') }}</p>
+                                <span class="text-[10px] font-bold text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">Ditemukan</span>
+                                <h4 class="text-xs font-bold text-white">{{ $mItem->item_name }}</h4>
+                                <p class="text-[11px] text-slate-400">{{ $mItem->location->name }} • {{ $mItem->found_date->format('d M Y') }}</p>
                             </div>
-                            <a href="{{ route('admin.found-items.show', $mItem->id) }}" class="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700">
-                                Lihat Penemuan &rarr;
+                            <a href="{{ route('admin.found-items.show', $mItem->id) }}" class="px-3.5 py-2 bg-slate-800 text-white text-xs font-semibold rounded-[14px] hover:bg-slate-700 transition-all">
+                                Detail &rarr;
                             </a>
                         </div>
                     @endforeach
@@ -105,4 +107,4 @@
 
     </div>
 
-</x-layout.admin>
+</x-layouts.admin>

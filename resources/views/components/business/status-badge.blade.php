@@ -2,29 +2,28 @@
 
 @php
     $badgeClasses = match($status) {
-        'lost' => 'bg-red-50 text-red-700 border-red-200',
-        'found' => 'bg-blue-50 text-blue-700 border-blue-200',
-        'pending' => 'bg-amber-50 text-amber-700 border-amber-200',
-        'claimed' => 'bg-amber-50 text-amber-700 border-amber-200',
-        'approved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-        'returned' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-        'rejected' => 'bg-rose-50 text-rose-700 border-rose-200',
-        default => 'bg-zinc-100 text-zinc-700 border-zinc-200'
+        'Belum Ditemukan', 'lost' => 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+        'Menunggu Pemilik', 'found' => 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
+        'Ditemukan', 'Diklaim', 'claimed' => 'bg-sky-500/15 text-sky-300 border-sky-500/30',
+        'Selesai', 'Dikembalikan', 'Disetujui', 'approved', 'returned' => 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+        'Pending', 'pending' => 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+        'Ditolak', 'rejected' => 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+        default => 'bg-slate-500/15 text-slate-300 border-slate-500/30'
     };
 
     $label = match($status) {
-        'lost' => 'Hilang',
-        'found' => 'Ditemukan',
-        'pending' => 'Menunggu Verifikasi',
+        'lost' => 'Belum Ditemukan',
+        'found' => 'Menunggu Pemilik',
+        'pending' => 'Pending',
         'claimed' => 'Diklaim',
-        'approved' => 'Klaim Disetujui',
+        'approved' => 'Disetujui',
         'returned' => 'Dikembalikan',
-        'rejected' => 'Klaim Ditolak',
-        default => ucfirst($status)
+        'rejected' => 'Ditolak',
+        default => $status
     };
 @endphp
 
-<span {{ $attributes->merge(['class' => "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border {$badgeClasses}"]) }}>
-    <span class="w-1.5 h-1.5 rounded-full mr-1.5 bg-current opacity-75"></span>
+<span {{ $attributes->merge(['class' => "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-md {$badgeClasses}"]) }}>
+    <span class="w-1.5 h-1.5 rounded-full mr-1.5 bg-current animate-pulse"></span>
     {{ $label }}
 </span>

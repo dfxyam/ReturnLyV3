@@ -1,87 +1,88 @@
-<x-layout.guest title="Tracking Status Klaim - ReturnLy">
+<x-layouts.guest title="Tracking Status Klaim - ReturnLy">
 
-    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div class="text-center mb-8">
-            <h1 class="text-2xl sm:text-3xl font-bold text-zinc-900">Cek Status Klaim</h1>
-            <p class="text-xs sm:text-sm text-zinc-600 mt-1">Masukkan Kode Klaim unik Anda (Contoh: CLM-XXXXXXXX) untuk melihat status verifikasi admin.</p>
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div class="text-center mb-8 space-y-2">
+            <span class="px-3.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 text-xs font-semibold border border-emerald-500/20 backdrop-blur-md">
+                Tracking Real-Time
+            </span>
+            <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">Cek Status Pengajuan Klaim</h1>
+            <p class="text-xs sm:text-sm text-slate-400">Masukkan Nomor WhatsApp atau ID Klaim Anda untuk memantau proses verifikasi.</p>
         </div>
 
         <!-- Search Box -->
-        <div class="bg-white p-4 rounded-2xl border border-[#E7E2DA] shadow-paper mb-8">
-            <form action="{{ route('claims.status') }}" method="GET" class="flex flex-col sm:flex-row gap-2">
-                <input type="text" name="claim_number" value="{{ request('claim_number') }}" required placeholder="Masukkan Kode Klaim (misal: CLM-A1B2C3D4)" class="flex-1 px-4 py-3 text-xs sm:text-sm bg-[#FAF8F4] border border-[#E7E2DA] rounded-xl focus:outline-none focus:border-zinc-900 font-mono">
-                <button type="submit" class="px-6 py-3 bg-zinc-900 text-white font-bold text-xs sm:text-sm rounded-xl hover:bg-zinc-800 transition-colors">
-                    Cek Status
+        <div class="glass-card p-6 rounded-[24px] border border-white/10 bg-slate-900/40 backdrop-blur-xl mb-8">
+            <form action="{{ route('claims.status') }}" method="GET" class="flex flex-col sm:flex-row gap-3">
+                <input type="text" name="phone" value="{{ request('phone', request('search')) }}" placeholder="Masukkan Nomor WA atau ID Klaim (contoh: 081234567890)" required class="flex-1 px-4 py-3 text-xs sm:text-sm bg-slate-950/60 border border-white/10 rounded-[18px] text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all">
+                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 font-bold text-xs sm:text-sm rounded-[18px] hover:brightness-110 shadow-lg shadow-emerald-500/20 transition-all">
+                    Cari Status
                 </button>
             </form>
         </div>
 
-        @if (request()->filled('claim_number'))
-            @if ($claim)
-                <!-- Claim Result Card -->
-                <div class="bg-white rounded-2xl border border-[#E7E2DA] shadow-paper p-6 sm:p-8 space-y-6">
-                    <div class="flex items-center justify-between border-b border-zinc-100 pb-4">
-                        <div>
-                            <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">Kode Klaim</span>
-                            <span class="text-lg font-bold font-mono text-zinc-900">{{ $claim->claim_number }}</span>
-                        </div>
-                        <x-business.status-badge :status="$claim->status" />
+        <!-- Results Section -->
+        @if($search)
+            <div class="space-y-6">
+                <h3 class="text-sm font-bold text-slate-300">Hasil Pencarian Klaim untuk: <span class="text-emerald-400">'{{ $search }}'</span></h3>
+
+                @if($claims->isEmpty())
+                    <div class="glass-card p-12 rounded-[24px] border border-white/10 bg-slate-900/40 text-center">
+                        <svg class="w-12 h-12 text-slate-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <p class="text-xs font-medium text-slate-400 mb-2">Tidak ada data klaim yang ditemukan untuk pencarian ini.</p>
+                        <p class="text-[11px] text-slate-500">Pastikan nomor WhatsApp yang Anda masukkan sesuai saat pengisian form klaim.</p>
                     </div>
+                @else
+                    <div class="space-y-6">
+                        @foreach($claims as $claim)
+                            <div class="glass-card p-6 rounded-[24px] border border-white/10 bg-slate-900/40 backdrop-blur-xl space-y-5">
+                                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 pb-4 border-b border-white/10">
+                                    <div>
+                                        <span class="text-[10px] text-slate-400 block">ID Klaim: #{{ $claim->id }}</span>
+                                        <h4 class="text-base font-bold text-white">{{ $claim->foundItem->item_name }}</h4>
+                                    </div>
+                                    <x-business.status-badge :status="$claim->status" />
+                                </div>
 
-                    <div class="space-y-3 text-xs text-zinc-600">
-                        <div class="flex justify-between">
-                            <span class="text-zinc-400">Barang Yang Diklaim:</span>
-                            <span class="font-bold text-zinc-900">{{ $claim->foundItem->item_name ?? 'N/A' }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-zinc-400">Nama Pengklaim:</span>
-                            <span class="font-semibold text-zinc-900">{{ $claim->claimant_name }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-zinc-400">Tanggal Pengajuan:</span>
-                            <span class="font-semibold text-zinc-900">{{ $claim->created_at->translatedFormat('d F Y, H:i') }}</span>
-                        </div>
-                    </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-slate-300">
+                                    <div>
+                                        <span class="text-slate-500 block text-[10px]">Nama Pengklaim</span>
+                                        <span class="font-semibold text-white">{{ $claim->claimer_name }} @if($claim->class_name)({{ $claim->class_name }})@endif</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500 block text-[10px]">Lokasi Penemuan</span>
+                                        <span class="font-semibold text-white">{{ $claim->foundItem->location->name }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500 block text-[10px]">Tanggal Pengajuan</span>
+                                        <span class="font-semibold text-white">{{ $claim->created_at->format('d M Y H:i') }}</span>
+                                    </div>
+                                </div>
 
-                    <div class="bg-[#FAF8F4] p-4 rounded-xl border border-[#E7E2DA]">
-                        <h4 class="text-xs font-bold text-zinc-900 uppercase tracking-wider mb-1">Bukti Kepemilikan Yang Diajukan</h4>
-                        <p class="text-xs text-zinc-600 leading-relaxed">{{ $claim->proof_description }}</p>
-                    </div>
+                                <div class="p-4 rounded-[18px] bg-slate-950/60 border border-white/5 space-y-1">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Alasan & Bukti Klaim:</span>
+                                    <p class="text-xs text-slate-300 italic">"{{ $claim->reason }}"</p>
+                                </div>
 
-                    @if ($claim->admin_notes)
-                        <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 text-amber-900">
-                            <h4 class="text-xs font-bold uppercase tracking-wider mb-1">Catatan Verifikasi Admin</h4>
-                            <p class="text-xs leading-relaxed">{{ $claim->admin_notes }}</p>
-                        </div>
-                    @endif
-
-                    <!-- Instructions Based on Status -->
-                    <div class="pt-4 border-t border-zinc-100 text-center">
-                        @if ($claim->status === 'pending')
-                            <p class="text-xs text-amber-700 bg-amber-50 p-3 rounded-xl">
-                                ⏳ Pengajuan klaim Anda sedang diproses oleh tim administrasi sekolah. Mohon pantau halaman ini secara berkala.
-                            </p>
-                        @elseif ($claim->status === 'approved')
-                            <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-800 space-y-2">
-                                <p class="text-xs font-bold">🎉 Selamat! Klaim Anda telah DISETUJUI oleh Admin Sekolah.</p>
-                                <p class="text-xs">Silakan datang ke Ruang Administrasi/Piket Sekolah dengan membawa Kode Klaim ini & kartu identitas siswa untuk mengambil barang Anda.</p>
+                                <!-- Status Progress Timeline -->
+                                <div class="pt-2">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-3">Timeline Status:</span>
+                                    <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+                                        <div class="p-2.5 rounded-xl border {{ $claim->status === 'Pending' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold' : 'bg-slate-950/40 text-slate-500 border-white/5' }}">
+                                            1. Pending
+                                        </div>
+                                        <div class="p-2.5 rounded-xl border {{ $claim->status === 'Disetujui' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold' : 'bg-slate-950/40 text-slate-500 border-white/5' }}">
+                                            2. Disetujui
+                                        </div>
+                                        <div class="p-2.5 rounded-xl border {{ $claim->status === 'Ditolak' ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 font-bold' : 'bg-slate-950/40 text-slate-500 border-white/5' }}">
+                                            3. Ditolak
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        @elseif ($claim->status === 'rejected')
-                            <p class="text-xs text-rose-700 bg-rose-50 p-3 rounded-xl">
-                                ❌ Pengajuan klaim Anda belum dapat disetujui karena bukti kurang mencukupi. Hubungi pihak sekolah jika ada pertanyaan.
-                            </p>
-                        @endif
+                        @endforeach
                     </div>
-                </div>
-            @else
-                <!-- Claim Not Found -->
-                <div class="bg-white rounded-2xl border border-[#E7E2DA] shadow-paper p-8 text-center">
-                    <svg class="w-12 h-12 text-zinc-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    <h3 class="text-base font-bold text-zinc-900 mb-1">Kode Klaim Tidak Ditemukan</h3>
-                    <p class="text-xs text-zinc-500">Pastikan Anda memasukkan Kode Klaim dengan benar (misal: CLM-XXXXXXXX).</p>
-                </div>
-            @endif
+                @endif
+            </div>
         @endif
     </div>
 
-</x-layout.guest>
+</x-layouts.guest>

@@ -12,14 +12,12 @@ class Admin extends Authenticatable
     protected $table = 'admins';
 
     protected $fillable = [
-        'name',
-        'email',
+        'username',
         'password',
     ];
 
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
     protected function casts(): array

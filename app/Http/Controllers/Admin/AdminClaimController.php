@@ -3,24 +3,20 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Claim;
 use App\Models\FoundItem;
-use App\Models\LostItem;
 use Illuminate\Http\Request;
 
 class AdminClaimController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Claim::with(['foundItem.category', 'lostItem']);
+        $query = Claim::with(['foundItem.category', 'foundItem.location']);
 
-        if ($request->filled('q')) {
-            $search = $request->q;
-            $query->where(function ($q) use ($search) {
-                $q->where('claim_number', 'like', "%{$search}%")
-                  ->orWhere('claimant_name', 'like', "%{$search}%")
-                  ->orWhere('claimant_phone', 'like', "%{$search}%");
-            });
+        if ($request->filled('search')) {
+            $query->where('claimer_name', 'like', '%' . $request->search . '%')
+                ->orWhere('phone_number', 'like', '%' . $request->search . '%');
         }
 
         if ($request->filled('status')) {
@@ -34,39 +30,55 @@ class AdminClaimController extends Controller
 
     public function show($id)
     {
-        $claim = Claim::with(['foundItem.category', 'foundItem.location', 'lostItem'])->findOrFail($id);
+        $claim = Claim::with(['foundItem.category', 'foundItem.location'])->findOrFail($id);
+
         return view('admin.claims.show', compact('claim'));
     }
 
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,approved,rejected',
-            'admin_notes' => 'nullable|string|max:1000',
-            'mark_returned' => 'nullable|boolean',
+            'status' => ['required', 'in:Pending,Disetujui,Ditolak'],
+            'item_status' => ['nullable', 'in:Diklaim,Dikembalikan'],
         ]);
 
-        $claim = Claim::findOrFail($id);
-        $claim->update([
-            'status' => $request->status,
-            'admin_notes' => $request->admin_notes,
-        ]);
+        $claim = Claim::with('foundItem')->findOrFail($id);
+        $foundItem = $claim->foundItem;
+        $newStatus = $request->status;
 
-        // If approved and admin requested to mark returned
-        if ($request->status === 'approved' && $request->boolean('mark_returned')) {
-            if ($claim->foundItem) {
-                $claim->foundItem->update(['status' => 'returned']);
+        $claim->update(['status' => $newStatus]);
+
+        if ($newStatus === 'Disetujui') {
+            // Update found item status to Diklaim or Dikembalikan (default: Diklaim)
+            $itemStatus = $request->input('item_status', 'Diklaim');
+            $foundItem->update(['status' => $itemStatus]);
+
+            // Reject all other pending claims for this found item
+            Claim::where('found_item_id', $foundItem->id)
+                ->where('id', '!=', $claim->id)
+                ->where('status', 'Pending')
+                ->update(['status' => 'Ditolak']);
+
+            ActivityLog::create([
+                'activity' => 'Menyetujui Klaim',
+                'description' => "Admin menyetujui klaim #{$claim->id} oleh {$claim->claimer_name} untuk barang '{$foundItem->item_name}'. Status barang menjadi {$itemStatus}.",
+            ]);
+        } elseif ($newStatus === 'Ditolak') {
+            // If item has no other approved claim, keep/revert status to 'Menunggu Pemilik'
+            $hasApprovedClaim = Claim::where('found_item_id', $foundItem->id)
+                ->where('status', 'Disetujui')
+                ->exists();
+
+            if (!$hasApprovedClaim) {
+                $foundItem->update(['status' => 'Menunggu Pemilik']);
             }
-            if ($claim->lostItem) {
-                $claim->lostItem->update(['status' => 'returned']);
-            }
-        } elseif ($request->status === 'rejected') {
-            // Revert found item status back to found if rejected
-            if ($claim->foundItem && $claim->foundItem->status === 'claimed') {
-                $claim->foundItem->update(['status' => 'found']);
-            }
+
+            ActivityLog::create([
+                'activity' => 'Menolak Klaim',
+                'description' => "Admin menolak klaim #{$claim->id} oleh {$claim->claimer_name} untuk barang '{$foundItem->item_name}'.",
+            ]);
         }
 
-        return back()->with('success', 'Status klaim #' . $claim->claim_number . ' berhasil diperbarui!');
+        return back()->with('success', "Status klaim berhasil diperbarui menjadi '{$newStatus}'.");
     }
 }

@@ -8,18 +8,13 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     * Per DATABASE.md Rule 1, no 'users' table is created.
+     * Only 'admins' table is used for authentication.
+     * 'sessions' table is required when SESSION_DRIVER=database.
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
-        });
+        // No users table created per DATABASE.md Rule 1
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();

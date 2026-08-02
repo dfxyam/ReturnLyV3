@@ -14,11 +14,22 @@ class StoreClaimRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'found_item_id' => 'required|exists:found_items,id',
-            'lost_item_id' => 'nullable|exists:lost_items,id',
-            'claimant_name' => 'required|string|max:100',
-            'claimant_phone' => 'required|string|max:20',
-            'proof_description' => 'required|string|min:10|max:1000',
+            'found_item_id' => ['required', 'exists:found_items,id'],
+            'claimer_name' => ['required', 'string', 'max:100'],
+            'class_name' => ['nullable', 'string', 'max:50'],
+            'phone_number' => ['required', 'string', 'max:20'],
+            'reason' => ['required', 'string', 'min:10'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'found_item_id.required' => 'Barang yang diklaim wajib dipilih.',
+            'claimer_name.required' => 'Nama pengklaim wajib diisi.',
+            'phone_number.required' => 'Nomor WhatsApp wajib diisi.',
+            'reason.required' => 'Alasan klaim wajib diisi.',
+            'reason.min' => 'Alasan klaim minimal 10 karakter.',
         ];
     }
 }

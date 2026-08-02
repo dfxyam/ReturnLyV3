@@ -10,18 +10,15 @@ return new class extends Migration
     {
         Schema::create('claims', function (Blueprint $table) {
             $table->id();
-            $table->string('claim_number', 50)->unique();
-            $table->foreignId('found_item_id')->constrained('found_items')->cascadeOnDelete();
-            $table->foreignId('lost_item_id')->nullable()->constrained('lost_items')->nullOnDelete();
-            $table->string('claimant_name', 100);
-            $table->string('claimant_phone', 20);
-            $table->text('proof_description');
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-            $table->text('admin_notes')->nullable();
+            $table->foreignId('found_item_id')->constrained('found_items')->cascadeOnUpdate()->restrictOnDelete();
+            $table->string('claimer_name', 100);
+            $table->string('class_name', 50)->nullable();
+            $table->string('phone_number', 20);
+            $table->text('reason');
+            $table->enum('status', ['Pending', 'Disetujui', 'Ditolak'])->default('Pending');
             $table->timestamps();
-            $table->softDeletes();
 
-            $table->index(['claim_number', 'status']);
+            $table->index(['status', 'found_item_id']);
         });
     }
 

@@ -11,10 +11,9 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         Admin::updateOrCreate(
-            ['email' => 'admin@returnly.test'],
+            ['username' => 'admin'],
             [
-                'name' => 'Administrator Sekolah',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('admin123'),
             ]
         );
     }

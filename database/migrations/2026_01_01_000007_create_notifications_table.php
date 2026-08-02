@@ -8,16 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('admins', function (Blueprint $table) {
+        Schema::create('notifications', function (Blueprint $table) {
             $table->id();
-            $table->string('username', 50)->unique();
-            $table->string('password', 255);
+            $table->string('title', 150);
+            $table->text('message');
+            $table->boolean('is_read')->default(false);
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('admins');
+        Schema::dropIfExists('notifications');
     }
 };

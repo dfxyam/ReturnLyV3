@@ -6,6 +6,7 @@ use App\Http\Requests\StoreLostItemRequest;
 use App\Models\Category;
 use App\Models\Location;
 use App\Models\LostItem;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 
 class LostItemController extends Controller
@@ -14,12 +15,8 @@ class LostItemController extends Controller
     {
         $query = LostItem::with(['category', 'location']);
 
-        if ($request->filled('q')) {
-            $search = $request->q;
-            $query->where(function ($q) use ($search) {
-                $q->where('item_name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
+        if ($request->filled('search')) {
+            $query->where('item_name', 'like', '%' . $request->search . '%');
         }
 
         if ($request->filled('category_id')) {
@@ -34,23 +31,18 @@ class LostItemController extends Controller
             $query->where('status', $request->status);
         }
 
-        $lostItems = $query->latest()->paginate(9)->withQueryString();
+        $items = $query->latest()->paginate(12)->withQueryString();
         $categories = Category::all();
         $locations = Location::all();
 
-        return view('lost-items.index', compact('lostItems', 'categories', 'locations'));
-    }
-
-    public function show($id)
-    {
-        $item = LostItem::with(['category', 'location'])->findOrFail($id);
-        return view('lost-items.show', compact('item'));
+        return view('lost-items.index', compact('items', 'categories', 'locations'));
     }
 
     public function create()
     {
         $categories = Category::all();
         $locations = Location::all();
+
         return view('lost-items.create', compact('categories', 'locations'));
     }
 
@@ -58,15 +50,28 @@ class LostItemController extends Controller
     {
         $data = $request->validated();
 
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('lost-items', 'public');
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('items', 'public');
+            $data['photo'] = $path;
         }
 
-        $data['status'] = 'lost';
+        $data['status'] = 'Belum Ditemukan';
+        $lostItem = LostItem::create($data);
 
-        LostItem::create($data);
+        // System notification for admin
+        Notification::create([
+            'title' => 'Laporan Kehilangan Baru',
+            'message' => "Laporan baru dari {$lostItem->reporter_name} untuk barang '{$lostItem->item_name}'.",
+        ]);
 
-        return redirect()->route('lost-items.index')
-            ->with('success', 'Laporan barang hilang berhasil dikirim! Kami akan memberi tahu Anda jika barang ditemukan.');
+        return redirect()->route('lost-items.show', $lostItem->id)
+            ->with('success', 'Laporan barang hilang berhasil dikirim.');
+    }
+
+    public function show($id)
+    {
+        $item = LostItem::with(['category', 'location'])->findOrFail($id);
+
+        return view('lost-items.show', compact('item'));
     }
 }

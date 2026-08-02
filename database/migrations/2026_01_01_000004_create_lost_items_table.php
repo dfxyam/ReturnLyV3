@@ -10,19 +10,19 @@ return new class extends Migration
     {
         Schema::create('lost_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
-            $table->foreignId('location_id')->constrained('locations')->cascadeOnDelete();
+            $table->foreignId('category_id')->constrained('categories')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreignId('location_id')->constrained('locations')->cascadeOnUpdate()->restrictOnDelete();
+            $table->string('reporter_name', 100);
+            $table->string('class_name', 50)->nullable();
+            $table->string('phone_number', 20);
             $table->string('item_name', 150);
-            $table->text('description')->nullable();
-            $table->string('image', 255)->nullable();
+            $table->text('description');
+            $table->string('photo', 255)->nullable();
             $table->date('lost_date');
-            $table->string('contact_name', 100);
-            $table->string('contact_phone', 20);
-            $table->enum('status', ['lost', 'claimed', 'returned'])->default('lost');
+            $table->enum('status', ['Belum Ditemukan', 'Ditemukan', 'Selesai'])->default('Belum Ditemukan');
             $table->timestamps();
-            $table->softDeletes();
 
-            $table->index(['item_name', 'status', 'lost_date']);
+            $table->index(['status', 'category_id', 'location_id']);
         });
     }
 

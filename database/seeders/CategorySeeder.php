@@ -11,11 +11,11 @@ class CategorySeeder extends Seeder
     {
         $categories = [
             'Elektronik',
-            'Tas',
             'Dompet',
+            'Tas',
+            'Alat Tulis',
             'Botol Minum',
             'Aksesoris',
-            'Buku',
             'Pakaian',
             'Lainnya',
         ];

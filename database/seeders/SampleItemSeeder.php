@@ -7,79 +7,103 @@ use App\Models\Location;
 use App\Models\LostItem;
 use App\Models\FoundItem;
 use App\Models\Claim;
+use App\Models\Notification;
+use App\Models\ActivityLog;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class SampleItemSeeder extends Seeder
 {
     public function run(): void
     {
         $elektronik = Category::where('name', 'Elektronik')->first()?->id ?? 1;
-        $tas = Category::where('name', 'Tas')->first()?->id ?? 2;
-        $dompet = Category::where('name', 'Dompet')->first()?->id ?? 3;
-        $aksesoris = Category::where('name', 'Aksesoris')->first()?->id ?? 5;
+        $tas = Category::where('name', 'Tas')->first()?->id ?? 3;
+        $dompet = Category::where('name', 'Dompet')->first()?->id ?? 2;
+        $botol = Category::where('name', 'Botol Minum')->first()?->id ?? 5;
 
-        $perpustakaan = Location::where('name', 'Perpustakaan')->first()?->id ?? 2;
-        $kantin = Location::where('name', 'Kantin')->first()?->id ?? 6;
-        $lapangan = Location::where('name', 'Lapangan')->first()?->id ?? 4;
-        $lab = Location::where('name', 'Laboratorium')->first()?->id ?? 3;
+        $perpustakaan = Location::where('name', 'Perpustakaan')->first()?->id ?? 1;
+        $kantin = Location::where('name', 'Kantin')->first()?->id ?? 2;
+        $lapangan = Location::where('name', 'Lapangan')->first()?->id ?? 3;
+        $ruangBk = Location::where('name', 'Ruang BK')->first()?->id ?? 5;
 
         // Lost items
         $lost1 = LostItem::create([
             'category_id' => $elektronik,
-            'location_id' => $lab,
-            'item_name' => 'Calculator Casio FX-991EX',
-            'description' => 'Warna hitam, ada stiker nama Budi kelas XII MIPA 1 di bagian belakang.',
+            'location_id' => $perpustakaan,
+            'reporter_name' => 'Ahmad',
+            'class_name' => 'XI RPL 1',
+            'phone_number' => '081234567890',
+            'item_name' => 'Kalkulator Casio FX-991EX',
+            'description' => 'Warna hitam, ada stiker nama Ahmad di bagian belakang.',
             'lost_date' => now()->subDays(2)->format('Y-m-d'),
-            'contact_name' => 'Budi Santoso',
-            'contact_phone' => '081234567890',
-            'status' => 'lost',
+            'status' => 'Belum Ditemukan',
         ]);
 
         $lost2 = LostItem::create([
             'category_id' => $dompet,
             'location_id' => $kantin,
-            'item_name' => 'Dompet Kulit Cokelat Eiger',
-            'description' => 'Berisi kartu pelajar atas nama Siti Rahma dan uang saku.',
+            'reporter_name' => 'Siti Rahma',
+            'class_name' => 'XII MIPA 2',
+            'phone_number' => '082198765432',
+            'item_name' => 'Dompet Kulit Cokelat',
+            'description' => 'Berisi kartu pelajar atas nama Siti Rahma.',
             'lost_date' => now()->subDays(1)->format('Y-m-d'),
-            'contact_name' => 'Siti Rahma',
-            'contact_phone' => '082198765432',
-            'status' => 'lost',
+            'status' => 'Belum Ditemukan',
         ]);
 
         // Found items
         $found1 = FoundItem::create([
-            'category_id' => $elektronik,
-            'location_id' => $lab,
-            'item_name' => 'Kalkulator Casio FX Series',
-            'description' => 'Ditemukan di meja lab komputer 2. Warna hitam.',
+            'category_id' => $botol,
+            'location_id' => $perpustakaan,
+            'finder_name' => 'Budi',
+            'class_name' => 'XI TKJ 2',
+            'phone_number' => '081298765432',
+            'item_name' => 'Botol Minum Thermos Hitam',
+            'description' => 'Botol minuman stainless steel warna hitam ada stiker anime.',
             'found_date' => now()->subDays(2)->format('Y-m-d'),
-            'contact_name' => 'Pak Joko (Petugas Lab)',
-            'contact_phone' => '085711223344',
-            'status' => 'found',
+            'storage_location' => 'Ruang BK',
+            'status' => 'Menunggu Pemilik',
         ]);
 
         $found2 = FoundItem::create([
             'category_id' => $tas,
-            'location_id' => $perpustakaan,
+            'location_id' => $lapangan,
+            'finder_name' => 'Pak Joko',
+            'class_name' => null,
+            'phone_number' => '081388776655',
             'item_name' => 'Tas Ransel Eiger Hitam',
-            'description' => 'Ditemukan di meja baca pojok perpustakaan.',
+            'description' => 'Ditemukan di bangku pinggir lapangan basket.',
             'found_date' => now()->subDays(3)->format('Y-m-d'),
-            'contact_name' => 'Bu Ani (Pustakawan)',
-            'contact_phone' => '081388776655',
-            'status' => 'found',
+            'storage_location' => 'Ruang Guru',
+            'status' => 'Menunggu Pemilik',
         ]);
 
         // Claim
-        Claim::create([
-            'claim_number' => 'CLM-' . strtoupper(Str::random(6)),
+        $claim1 = Claim::create([
             'found_item_id' => $found1->id,
-            'lost_item_id' => $lost1->id,
-            'claimant_name' => 'Budi Santoso',
-            'claimant_phone' => '081234567890',
-            'proof_description' => 'Ada stiker nama Budi kelas XII MIPA 1 di casing belakang kalkulator.',
-            'status' => 'pending',
-            'admin_notes' => null,
+            'claimer_name' => 'Hisyam',
+            'class_name' => 'XI RPL 1',
+            'phone_number' => '081234567890',
+            'reason' => 'Botol berwarna hitam dengan stiker Naruto di bagian bawah dan sedikit goresan di tutupnya.',
+            'status' => 'Pending',
+        ]);
+
+        // Sample notifications
+        Notification::create([
+            'title' => 'Laporan Kehilangan Baru',
+            'message' => 'Ahmad (XI RPL 1) melaporkan kehilangan Kalkulator Casio FX-991EX di Perpustakaan.',
+            'is_read' => false,
+        ]);
+
+        Notification::create([
+            'title' => 'Klaim Baru Perlu Verifikasi',
+            'message' => 'Hisyam mengajukan klaim untuk Botol Minum Thermos Hitam.',
+            'is_read' => false,
+        ]);
+
+        // Sample activity log
+        ActivityLog::create([
+            'activity' => 'Sistem Diinisialisasi',
+            'description' => 'Database awal ReturnLy berhasil di-seed.',
         ]);
     }
 }

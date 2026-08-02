@@ -10,16 +10,14 @@ class LocationSeeder extends Seeder
     public function run(): void
     {
         $locations = [
-            'Ruang Kelas',
             'Perpustakaan',
-            'Laboratorium',
-            'Lapangan',
-            'Masjid',
             'Kantin',
-            'Parkiran',
+            'Lapangan',
+            'Mushola',
+            'Ruang BK',
             'Aula',
+            'Parkiran',
             'Koridor',
-            'Lainnya',
         ];
 
         foreach ($locations as $location) {
